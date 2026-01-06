@@ -82,7 +82,7 @@ class Splitter
 
         if @fullname
             tokens.reject!(&:empty?)
-            return tokens.join('-')
+            return tokens.join('\\')
         else
             return tokens[-1]
         end
@@ -93,7 +93,7 @@ class Splitter
         folder = line.split.last
 
         if @fullname
-            filename = folder.split("/").drop(1).join("-")
+            filename = folder.split("/").drop(1).join("\\")
         else
             filename = folder.split("/").last
         end
