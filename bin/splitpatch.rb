@@ -166,7 +166,6 @@ class Splitter
         outfile = nil
         stream = open(@filename, 'rb')
         filename = ""
-        counter = 0
         header = []
 
         until (stream.eof?)
@@ -178,6 +177,7 @@ class Splitter
                 # Drop into "legacy mode"
                 legacy = true
                 filename = getFilename(line)
+                filename << ".patch"
                 header << line
 
                 # Remaining 3 lines of header
@@ -185,20 +185,18 @@ class Splitter
                     line = stream.readline
                     header << line
                 end
-                counter = 0
             # Start of a new git patch
             elsif (line =~ /^diff --git .*/) == 0
                 # If we hit this, the previous git patch had no hunk, so the file never started
                 if (in_git_header)
-                    hunklessfilename = "#{filename}.000.patch"
-                    outfile = createFile(hunklessfilename)
+                    outfile = createFile(filename)
                     outfile.write(header.join('')) # Header ended up storing the entire patch
                 end
 
                 git = true
                 header = [ line ]
                 filename = getGitFilename(line)
-                counter = 0
+                filename << ".patch"
 
                 # Future lines will be within a header until we reach a hunk, new patch, or EOF
                 in_git_header = true
@@ -207,7 +205,7 @@ class Splitter
                 # next line is header too
                 header = [ line, stream.readline ]
                 filename = getFilenameByHeader(header)
-                counter = 0
+                filename << ".patch"
             elsif (line =~ /@@ .* @@/) == 0
                 in_git_header = false
 
@@ -215,10 +213,7 @@ class Splitter
                     outfile.close_write
                 end
 
-                zero = counter.to_s.rjust(3, '0')
-                hunkfilename = "#{filename}.#{zero}.patch"
-                outfile = createFile(hunkfilename)
-                counter += 1
+                outfile = createFile(filename)
 
                 outfile.write(header.join(''))
                 outfile.write(line)
@@ -234,8 +229,7 @@ class Splitter
 
         # Last patch in file had no hunk, hit EOF before we could write everything in header
         if (in_git_header)
-            hunklessfilename = "#{filename}.000.patch"
-            outfile = createFile(hunklessfilename)
+            outfile = createFile(filename)
             outfile.write(header.join(''))
         end
     end
