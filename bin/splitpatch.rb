@@ -59,7 +59,7 @@ class Splitter
                 zero = appendix.to_s
             end
 
-            filename = "#{filename}.#{zero}.patch"
+            filename = "#{filename}.#{zero}"
         end
         return open(filename, "w")
     end
