@@ -50,7 +50,6 @@ class Splitter
 
     def createFile(filename)
         if File.exist?(filename)
-            puts "File #{filename} already exists. Renaming patch."
             appendix = 2
             zero = appendix.to_s
 
