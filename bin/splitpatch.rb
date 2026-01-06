@@ -59,7 +59,7 @@ class Splitter
                 zero = appendix.to_s.rjust(3, '0')
             end
 
-            filename << ".#{zero}"
+            filename << ".#{zero}.patch"
         end
         return open(filename, "w")
     end
@@ -121,7 +121,6 @@ class Splitter
                 end
 
                 filename = getFilename(line)
-                filename << ".patch"
                 outfile = createFile(filename)
                 outfile.write(line)
             elsif (line =~ /^diff --git .*/) == 0 and not legacy
@@ -133,8 +132,6 @@ class Splitter
                 outfile = nil
 
                 filename = getGitFilename(line)
-                filename << ".patch"
-
                 outfile = createFile(filename)
                 outfile.write(line)
             # This line will show up in a git patch, but it shouldn't mark the start of the patch
@@ -147,7 +144,6 @@ class Splitter
                 # Next line is header too
                 header = [ line, stream.readline ]
                 filename = getFilenameByHeader(header)
-                filename << ".patch"
 
                 outfile = createFile(filename)
                 outfile.write(header.join(''))
@@ -177,7 +173,6 @@ class Splitter
                 # Drop into "legacy mode"
                 legacy = true
                 filename = getFilename(line)
-                filename << ".patch"
                 header << line
 
                 # Remaining 3 lines of header
@@ -196,7 +191,6 @@ class Splitter
                 git = true
                 header = [ line ]
                 filename = getGitFilename(line)
-                filename << ".patch"
 
                 # Future lines will be within a header until we reach a hunk, new patch, or EOF
                 in_git_header = true
@@ -205,7 +199,6 @@ class Splitter
                 # next line is header too
                 header = [ line, stream.readline ]
                 filename = getFilenameByHeader(header)
-                filename << ".patch"
             elsif (line =~ /@@ .* @@/) == 0
                 in_git_header = false
 
@@ -214,7 +207,6 @@ class Splitter
                 end
 
                 outfile = createFile(filename)
-
                 outfile.write(header.join(''))
                 outfile.write(line)
             # We haven't found a hunk, new patch, or EOF yet
